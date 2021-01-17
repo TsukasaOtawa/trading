@@ -1,11 +1,16 @@
-from ../config/api/env import env
 import requests
 import json
 import pandas as pd
 from datetime import *
 
-START_Q = '2019Q1'
-END_Q = '2020Q3'
+BC_API_ENDPOINT_QUARTER = "https://api.buffett-code.com/api/v2/quarter"
+BC_API_ENDPOINT_DAILY = "https://api.buffett-code.com/api/v2/daily"
+BC_API_ENDPOINT_INDICATOR = "https://api.buffett-code.com/api/v2/indicator"
+
+APIKEY = '{api_key}'
+
+START_Q = '2020Q1'
+END_Q = '2021Q4'
 
 def fetch(bc_endpoint, ticker=None, from_q=None, to_q=None):
     if not ticker:
@@ -19,13 +24,13 @@ def fetch(bc_endpoint, ticker=None, from_q=None, to_q=None):
             'to': to_q,
         },
         headers={
-            'x-api-key': env.APIKEY,
+            'x-api-key': APIKEY,
         },
     )
     return response
 
 def make_df(ticker:str):
-    res_q = fetch(env.BC_API_ENDPOINT_QUARTER, ticker, START_Q, END_Q)
+    res_q = fetch(BC_API_ENDPOINT_QUARTER, ticker, START_Q, END_Q)
     json_data_q = json.loads(res_q.text)
     df_q = pd.DataFrame.from_dict(json_data_q[ticker])
     # 日付データを datetime型に変換
@@ -36,11 +41,11 @@ def make_df(ticker:str):
         datetime_data = df_q[df_q['to_datetime'] == df_sorted[sort_num]]
         df_concat = pd.concat([df_concat, datetime_data], axis=0)
 
-    year = 2019
-    month = 4
+    year = 2020
+    month = 1
     START_DAY = f"{year}-0{month}-01" #2019年度の第1四半期の時系列と合わせる
-    END_DAY =  "2020-03-31" #2019年度の第4四半期の時系列と合わせる
-    res_day = fetch(env.BC_API_ENDPOINT_DAILY, ticker, START_DAY, END_DAY)
+    END_DAY =  "2020-12-31" #2019年度の第4四半期の時系列と合わせる
+    res_day = fetch(BC_API_ENDPOINT_DAILY, ticker, START_DAY, END_DAY)
     json_data_day = json.loads(res_day.text)
     df_d = pd.DataFrame.from_dict(json_data_day[ticker])
     
@@ -80,7 +85,7 @@ def make_df(ticker:str):
         df_day_list.append(df_merge.T) #day
 
     #期間を指定せず、時点(直近営業日)を指定しいているため"None"を記入
-    res_c = fetch(env.BC_API_ENDPOINT_INDICATOR, ticker, None, None)
+    res_c = fetch(BC_API_ENDPOINT_INDICATOR, ticker, None, None)
     json_data_c = json.loads(res_c.text)
     #バフェットコードの仕様で一回当たり最大3社が取得可能な為対応
     df_c= pd.DataFrame.from_dict(json_data_c[ticker]) 

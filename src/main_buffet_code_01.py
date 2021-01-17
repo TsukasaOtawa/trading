@@ -1,5 +1,4 @@
 from buffet_code import sample
-from buffet_code import sample2
 
 # CSV へ保存
 # ticker_code = input() #7974,9983,1547
