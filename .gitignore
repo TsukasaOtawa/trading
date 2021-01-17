@@ -1,0 +1,5 @@
+/config/api/env.py
+/sample.db
+/csv/
+/src/kabutan/__pycache__/
+/src/buffet_code/__pycache__/
